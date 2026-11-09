@@ -183,6 +183,12 @@ func (s *Syncer) syncCardDAVToProton(ctx context.Context) error {
 		default:
 		}
 
+		// Skip contacts without an email address.
+		if !hasEmail(obj.Card) {
+			s.log.Debug("skip contact: no email address", "path", obj.Path)
+			continue
+		}
+
 		var buf bytes.Buffer
 		if encErr := vcard.NewEncoder(&buf).Encode(obj.Card); encErr != nil {
 			s.log.Warn("skip carddav contact: encode vcard failed",
@@ -583,6 +589,11 @@ func (s *Syncer) carddavIndex(ctx context.Context) (map[string]contactSide, erro
 
 	out := make(map[string]contactSide, len(objects))
 	for _, obj := range objects {
+		if !hasEmail(obj.Card) {
+			s.log.Debug("skip contact in index: no email address", "path", obj.Path)
+			continue
+		}
+
 		var buf bytes.Buffer
 		if encErr := vcard.NewEncoder(&buf).Encode(obj.Card); encErr != nil {
 			s.log.Warn("skip carddav contact in index: encode failed", "path", obj.Path, "err", encErr)
@@ -618,4 +629,15 @@ func extractFN(raw string) string {
 		return f.Value
 	}
 	return ""
+}
+
+// hasEmail returns true if the vCard contains at least
+// one non-empty email address.
+func hasEmail(card vcard.Card) bool {
+    for _, email := range card.Values(vcard.FieldEmail) {
+        if strings.TrimSpace(email) != "" {
+            return true
+        }
+    }
+    return false
 }
