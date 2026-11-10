@@ -86,6 +86,9 @@ type SyncConfig struct {
 	// Proton per sync run, spreading a large first sync over several runs
 	// (0 = unlimited).
 	MaxNewProtonContactsPerRun int `mapstructure:"max_new_proton_contacts_per_run"`
+	// EmailOnly filters the CardDAV contacts so that only those containing a
+	// valid email address are synchronized to Proton
+	EmailOnly bool `mapstructure:"email_only"`
 }
 
 // DatabaseConfig holds SQLite storage settings.
@@ -166,6 +169,7 @@ func setDefaults(v *viper.Viper) {
 	v.SetDefault("sync.conflict", "prefer-newer")
 	v.SetDefault("sync.proton_max_requests_per_minute", DefaultProtonMaxRequestsPerMinute)
 	v.SetDefault("sync.max_new_proton_contacts_per_run", DefaultMaxNewProtonContactsPerRun)
+	v.SetDefault("sync.email_only", false)
 	v.SetDefault("database.path", "~/.local/share/proton-carddav-sync/sync.db")
 	v.SetDefault("log.level", "info")
 	v.SetDefault("log.format", "text")

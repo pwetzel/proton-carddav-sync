@@ -43,6 +43,8 @@ sync:
   # run; the rest are created on later runs. 0 = unlimited (pacing still applies).
   # Consider setting e.g. 50 for the very first sync of a large address book.
   max_new_proton_contacts_per_run: 0
+  # Synchronize only CardDAV entries that contain a valid email
+  email_only: false
 
 database:
   # Path to the SQLite database file; ~ is expanded.

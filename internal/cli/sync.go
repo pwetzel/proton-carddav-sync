@@ -98,7 +98,8 @@ func withSyncer(ctx context.Context, cfg *config.Config, log *slog.Logger, fn fu
 
 	dir := parseSyncDirection(cfg.Sync.Direction)
 	s := syncer.New(protonClient, carddavClient, sqlDB, log, dir,
-		parseConflictPolicy(cfg.Sync.Conflict), cfg.Sync.MaxNewProtonContactsPerRun)
+		parseConflictPolicy(cfg.Sync.Conflict), cfg.Sync.MaxNewProtonContactsPerRun,
+		cfg.Sync.EmailOnly)
 
 	return fn(s)
 }

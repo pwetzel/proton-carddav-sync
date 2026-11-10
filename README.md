@@ -73,6 +73,7 @@ edit it by hand). No secrets are stored in this file.
 | `sync.interval_seconds` | `300` | Daemon sync interval, in seconds |
 | `sync.proton_max_requests_per_minute` | `60` | Throttle for **all** Proton API calls (see [Proton rate limits](#proton-rate-limits--account-safety)) |
 | `sync.max_new_proton_contacts_per_run` | `0` | Optional cap on new Proton contacts created per run (`0` = unlimited) |
+| `sync.email_only` | `false` | Synchronize only CardDAV entries with valid emails (skipping those with only phone numbers, for instance) |
 | `database.path` | `~/.local/share/…/sync.db` | SQLite state database path |
 | `log.level` | `info` | `debug` / `info` / `warn` / `error` |
 | `log.format` | `text` | `text` / `json` |

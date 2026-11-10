@@ -35,6 +35,7 @@ type Syncer struct {
 	log          *slog.Logger
 	dir          Direction
 	policy       vcardsync.Policy
+	emailOnly    bool
 	maxNewProton int // cap on new Proton contacts created per run (0 = unlimited)
 }
 
@@ -50,6 +51,7 @@ func New(
 	dir Direction,
 	policy vcardsync.Policy,
 	maxNewProton int,
+	emailOnly bool,
 ) *Syncer {
 	return &Syncer{
 		proton:       protonClient,
@@ -59,6 +61,7 @@ func New(
 		dir:          dir,
 		policy:       policy,
 		maxNewProton: maxNewProton,
+		emailOnly:    emailOnly,
 	}
 }
 
@@ -184,8 +187,8 @@ func (s *Syncer) syncCardDAVToProton(ctx context.Context) error {
 		}
 
 		// Skip contacts without an email address.
-		if !hasEmail(obj.Card) {
-			s.log.Debug("skip contact: no email address", "path", obj.Path)
+		if !s.shouldSyncContact(obj.Card) {
+			s.log.Debug("skip contact: no email address or email_only", "path", obj.Path)
 			continue
 		}
 
@@ -589,8 +592,8 @@ func (s *Syncer) carddavIndex(ctx context.Context) (map[string]contactSide, erro
 
 	out := make(map[string]contactSide, len(objects))
 	for _, obj := range objects {
-		if !hasEmail(obj.Card) {
-			s.log.Debug("skip contact in index: no email address", "path", obj.Path)
+		if !s.shouldSyncContact(obj.Card) {
+			s.log.Debug("skip contact in index: no email address or email_only", "path", obj.Path)
 			continue
 		}
 
@@ -631,13 +634,17 @@ func extractFN(raw string) string {
 	return ""
 }
 
-// hasEmail returns true if the vCard contains at least
-// one non-empty email address.
-func hasEmail(card vcard.Card) bool {
-    for _, email := range card.Values(vcard.FieldEmail) {
-        if strings.TrimSpace(email) != "" {
-            return true
-        }
-    }
-    return false
+// shouldSyncContact returns true if config email_only is false, or if the
+// contact has an email
+func (s *Syncer) shouldSyncContact(card vcard.Card) bool {
+	if !s.emailOnly {
+		return true
+	}
+
+	for _, email := range card.Values(vcard.FieldEmail) {
+		if strings.TrimSpace(email) != "" {
+			return true
+		}
+	}
+	return false
 }
